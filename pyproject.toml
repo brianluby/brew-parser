@@ -37,7 +37,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "brew-parser"
-version = "0.2.0"
+version = "0.2.1"
 description = "Track changes in Homebrew formulas - see what's new, updated, or removed"
 readme = "README.md"
 requires-python = ">=3.8"
