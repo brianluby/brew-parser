@@ -38,6 +38,18 @@ pip install -r requirements.txt
 
 **Note:** On macOS with Homebrew-installed Python, you must use a virtual environment due to [PEP 668](https://peps.python.org/pep-0668/). This prevents conflicts between system packages and project dependencies.
 
+### Install with pipx (optional)
+
+With the packaged CLI, you can install a global command `brew-parser`:
+
+```bash
+# From a local checkout
+pipx install .
+
+# Then run the CLI from anywhere
+brew-parser --format table --limit 20
+```
+
 ## Usage
 
 ### Quick Start (First Time)
@@ -80,8 +92,6 @@ deactivate
 | `brew_parser.py update` | Manually update local snapshot only |
 | `brew_parser.py diff` | Show changes since last snapshot (does not save) |
 | `brew_parser.py new` | Show only newly added formulas (legacy helper) |
-
-**Note:** The `--days` parameter is currently a placeholder. Date filtering will be implemented in a future version.
 
 ## Data Storage
 
