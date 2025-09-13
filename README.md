@@ -1,5 +1,7 @@
 # brew-parser
 
+[Examples (v0.3.0): Markdown](https://github.com/brianluby/brew-parser/releases/download/v0.3.0/markdown-example.md) · [Table (text)](https://github.com/brianluby/brew-parser/releases/download/v0.3.0/table-example.txt) · [HTML](https://github.com/brianluby/brew-parser/releases/download/v0.3.0/table-example.html) · [JSON](https://github.com/brianluby/brew-parser/releases/download/v0.3.0/changes-example.json)
+
 A command-line tool to discover and explore new Homebrew formulas.
 
 ## Overview
