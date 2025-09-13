@@ -175,3 +175,20 @@ MIT
 ## Contributing
 
 See `AGENTS.md` for a concise contributor guide covering project layout, dev commands, coding style, testing, and PR expectations.
+
+## Examples
+
+Downloadable samples from the latest release (v0.3.0):
+
+- Markdown: https://github.com/brianluby/brew-parser/releases/download/v0.3.0/markdown-example.md
+- Table (text): https://github.com/brianluby/brew-parser/releases/download/v0.3.0/table-example.txt
+- Table (HTML): https://github.com/brianluby/brew-parser/releases/download/v0.3.0/table-example.html
+- JSON: https://github.com/brianluby/brew-parser/releases/download/v0.3.0/changes-example.json
+
+Regenerate locally:
+
+```bash
+source venv/bin/activate
+PYTHONPATH=. python scripts/generate_examples.py
+# Outputs to examples/: changes-example.json, markdown-example.md, table-example.*
+```
