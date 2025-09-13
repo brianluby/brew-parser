@@ -275,10 +275,10 @@ class TestBrewParser:
         assert parser.stored_formulas_path.exists()
         assert parser.metadata_path.exists()
 
-        # Verify content
+        # Verify content (wrapped format {"formulas": [...]})
         with open(parser.stored_formulas_path) as f:
             stored_data = json.load(f)
-        assert stored_data == mock_formulas
+        assert stored_data["formulas"] == mock_formulas
 
         # Verify metadata
         with open(parser.metadata_path) as f:
@@ -295,10 +295,10 @@ class TestBrewParser:
         parser.stored_formulas_path = tmp_path / "formulas.json"
         parser.metadata_path = tmp_path / "metadata.json"
 
-        # Create existing data
+        # Create existing data (wrapped format {"formulas": [...]})
         existing_data = [{"name": "tool1", "desc": "Tool 1"}]
         with open(parser.stored_formulas_path, "w") as f:
-            json.dump(existing_data, f, indent=2)
+            json.dump({"formulas": existing_data}, f, indent=2)
 
         # Mock same data from API
         mock_fetch.return_value = existing_data
