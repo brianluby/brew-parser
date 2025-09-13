@@ -443,11 +443,10 @@ class TestBrewParser:
         # Format and display
         parser.format_diff_as_table(diff)
 
-        # Should still print summary
-        mock_print.assert_called()
-        # Check last call was summary with all zeros
-        last_call = mock_print.call_args_list[-1][0][0]
-        assert "0 added, 0 removed, 0 updated" in last_call
+        # Should print summary first
+        assert mock_print.call_count >= 1
+        first_call = mock_print.call_args_list[0][0][0]
+        assert "0 added, 0 removed, 0 updated" in first_call
 
 
 class TestSubcommands:

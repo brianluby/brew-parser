@@ -500,6 +500,15 @@ class BrewParser:
             table readability. Full descriptions can be viewed with
             the regular 'brew_parser.py' command.
         """
+        # Print summary first
+        self.console.print(
+            f"[bold]Summary:[/bold] "
+            f"{len(diff['added'])} added, "
+            f"{len(diff['removed'])} removed, "
+            f"{len(diff['updated'])} updated"
+        )
+        self.console.print()  # Empty line for spacing
+
         # Display newly added formulas with green styling for positive changes
         if diff["added"]:
             table = Table(title="[green]New Formulas[/green]")
@@ -568,13 +577,7 @@ class BrewParser:
             self.console.print(table)
             self.console.print()
 
-        # Print summary line with totals for each category
-        self.console.print(
-            f"[bold]Summary:[/bold] "
-            f"{len(diff['added'])} added, "
-            f"{len(diff['removed'])} removed, "
-            f"{len(diff['updated'])} updated"
-        )
+        # Summary already printed at the top
 
 
 def handle_update_command(args: argparse.Namespace) -> None:
