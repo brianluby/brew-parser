@@ -6,6 +6,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 brew-parser is a Python command-line tool that tracks changes in Homebrew formulas over time. It maintains a local database of formula information and compares it with the current state to show what's new, updated, or removed. The project emphasizes clean code with comprehensive inline comments and test coverage.
 
+### Project Status
+- **Current Version**: 0.2.0
+- **Python Version**: 3.8+ (tested with 3.13)
+- **License**: MIT
+- **Repository**: https://github.com/bluby/brew-parser
+
 ## Key Commands
 
 ### Development Setup
@@ -57,10 +63,10 @@ pytest -k "test_format" -v
 black brew_parser.py test_brew_parser.py
 
 # Type checking (strict mode configured in pyproject.toml)
-mypy brew_parser.py
+mypy brew_parser.py --strict
 
-# Linting
-flake8 brew_parser.py test_brew_parser.py
+# Linting (88 character line limit for black compatibility)
+flake8 brew_parser.py test_brew_parser.py --max-line-length=88
 ```
 
 ## Architecture
@@ -90,8 +96,9 @@ The project follows a modular architecture with clear separation of concerns:
 
 - **Location**: `~/.brew-parser/`
 - **Files**:
-  - `formulas.json`: Complete formula data snapshot
-  - `metadata.json`: Update timestamp and hash
+  - `formulas.json`: Complete formula data snapshot stored as `{"formulas": [...]}` wrapper object
+  - `metadata.json`: Update timestamp, formula count, and SHA256 hash
+- **Format Decision**: Data is wrapped in a dictionary to allow future extensibility (e.g., adding version info, source metadata)
 
 ### Testing Strategy
 
@@ -110,17 +117,21 @@ The project follows a modular architecture with clear separation of concerns:
 
 4. **Rich Output**: Uses the Rich library for beautiful terminal output with color-coded tables and markdown rendering.
 
-5. **API Etiquette**: Custom User-Agent header identifies our script to Homebrew's servers.
+5. **API Etiquette**: Custom User-Agent header identifies our script to Homebrew's servers as `brew-parser/1.0 (https://github.com/bluby/brew-parser)`.
 
 6. **Efficient Comparison**: Uses set operations and dictionary lookups for O(n) comparison performance.
 
-7. **Error Handling**: All commands handle missing data gracefully and provide helpful error messages.
+7. **Error Handling**: All commands handle missing data gracefully with specific exception types:
+   - `requests.RequestException` for network errors
+   - `IOError`/`OSError` for file system errors
+   - `json.JSONDecodeError` for parsing errors
+   - `ValueError` for data validation errors
 
 ## Design Decisions
 
 1. **Local Storage**: Chose `~/.brew-parser/` to follow Unix conventions for user-specific application data.
 
-2. **JSON Format**: Human-readable format allows users to inspect data if needed.
+2. **JSON Format**: Human-readable format with 2-space indentation. Data is wrapped in a dictionary with a "formulas" key for consistent parsing between save and load operations.
 
 3. **Subcommands**: Used argparse subparsers for clear command separation and future extensibility.
 
@@ -139,3 +150,91 @@ Planned:
 - Integration with brew analytics for popularity data
 - Auto-adding formulas to user's Brewfile
 - Export functionality (JSON, CSV)
+
+## Recent Changes (v0.2.0)
+
+### Fixed Issues
+1. Removed unused click dependency
+2. Fixed type annotations for API response methods
+3. Removed unused imports (timedelta, Set, os)
+4. Updated User-Agent to use actual GitHub URL
+5. Made exception handling more specific
+6. Fixed data format consistency between save/load
+7. Applied black formatting
+8. Achieved flake8 and mypy strict compliance
+
+### Data Format Change
+**Important**: The storage format changed in v0.2.0. Old data files will cause errors. Users should run `brew_parser.py update` after upgrading.
+
+## Code Quality Standards
+
+### Type Annotations
+- All methods have complete type annotations
+- Use `Dict[str, Any]` for API responses
+- Return types explicitly defined for all functions
+- MyPy strict mode compliance required
+
+### Code Formatting
+- Black formatter with 88-character line limit
+- Consistent import ordering (handled by black)
+- No trailing whitespace
+- Proper shebang format: `#! /usr/bin/env python3`
+
+### Testing Requirements
+- All new features must have corresponding tests
+- Mock external API calls
+- Test edge cases (empty data, errors, missing fields)
+- Maintain >90% code coverage
+
+### Dependencies
+- Core: requests, rich
+- Development: pytest, pytest-cov, pytest-mock, black, flake8, mypy, types-requests
+- No unused dependencies (removed click in v0.2.0)
+- Use pip-compile for consistent dependency management
+
+## Common Development Tasks
+
+### Adding a New Command
+1. Add subparser in `main()` function
+2. Create handler function following pattern: `handle_<command>_command(args)`
+3. Add tests in `TestSubcommands` class
+4. Update README.md command reference table
+
+### Modifying Data Format
+1. Update both `update_stored_formulas()` and `load_stored_formulas()`
+2. Consider backward compatibility or migration
+3. Update tests that create test data
+4. Document change in CHANGELOG.md
+
+### API Changes
+1. Update type annotations
+2. Add error handling for new failure modes
+3. Update mock responses in tests
+4. Consider rate limiting implications
+
+## Known Limitations
+
+1. **Date Filtering**: The `--days` parameter is non-functional because Homebrew API doesn't provide formula creation dates
+2. **Rate Limiting**: No explicit rate limiting implemented (relies on good citizenship)
+3. **Large Dataset**: Formula list is ~5MB and growing; future optimization may be needed
+4. **No Incremental Updates**: Always fetches full formula list (potential for delta updates)
+
+## Future Development Notes
+
+### High Priority
+- Add progress bars for long operations
+- Implement connection retry logic
+- Add `--json` output format option
+- Support for Homebrew casks (GUI applications)
+
+### Medium Priority  
+- Delta updates (only fetch changes)
+- Multiple snapshot history
+- Search/filter functionality
+- Integration with user's Brewfile
+
+### Low Priority
+- Web UI for browsing changes
+- Analytics integration
+- Formula popularity metrics
+- Automated notifications for favorite formulas

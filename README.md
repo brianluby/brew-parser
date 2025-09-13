@@ -21,7 +21,7 @@ This tool automates the workflow of discovering new packages in Homebrew by:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/brew-parser.git
+git clone https://github.com/bluby/brew-parser.git
 cd brew-parser
 
 # Create a virtual environment (required on macOS with Homebrew Python)
@@ -91,7 +91,7 @@ deactivate
 ## Data Storage
 
 The tool stores formula data in `~/.brew-parser/`:
-- `formulas.json` - Current snapshot of all Homebrew formulas
+- `formulas.json` - Current snapshot of all Homebrew formulas (stored as `{"formulas": [...]}` for consistent parsing)
 - `metadata.json` - Metadata including last update time and data hash
 
 This local storage enables:
@@ -117,11 +117,11 @@ pytest --cov=brew_parser
 # Format code
 black brew_parser.py test_brew_parser.py
 
-# Type checking
-mypy brew_parser.py
+# Type checking (strict mode)
+mypy brew_parser.py --strict
 
 # Run linting
-flake8 brew_parser.py test_brew_parser.py
+flake8 brew_parser.py test_brew_parser.py --max-line-length=88
 ```
 
 ## Troubleshooting
@@ -155,6 +155,14 @@ chmod +x brew_parser.py
 - [ ] Cask support (track GUI applications)
 - [ ] Export changes to various formats (JSON, CSV)
 - [ ] Web interface for browsing changes
+
+## Recent Improvements (v0.2.0)
+
+- **Type Safety**: Added comprehensive type annotations for all methods
+- **Better Error Handling**: More specific exception catching for network, file I/O, and JSON parsing errors
+- **Code Quality**: Fully compliant with black, flake8, and mypy strict mode
+- **Cleaner Dependencies**: Removed unused dependencies
+- **Data Format Consistency**: Unified storage format for reliable data loading
 
 ## License
 
