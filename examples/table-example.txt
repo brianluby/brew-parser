@@ -1,0 +1,26 @@
+Summary: 2 added, 1 removed, 1 updated
+
+                                  New Formulas                                  
+┏━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Name    ┃ Version ┃ Description                                              ┃
+┡━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ ripgrep │ 14.1.0  │ Line-oriented search tool that recursively searches your │
+│         │         │ cur...                                                   │
+│ fd      │ 8.7.0   │ Simple, fast and user-friendly alternative to 'find'     │
+└─────────┴─────────┴──────────────────────────────────────────────────────────┘
+
+           Removed Formulas            
+┏━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━┓
+┃ Name    ┃ Version ┃ Description     ┃
+┡━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━┩
+│ oldtool │ 0.9.0   │ Deprecated tool │
+└─────────┴─────────┴─────────────────┘
+
+                                Updated Formulas                                
+┏━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Name   ┃ Old Version ┃ New Version ┃ Description                             ┃
+┡━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ httpie │ 3.2.0       │ 3.3.0       │ User-friendly cURL replacement          │
+│        │             │             │ (command-line HTTP ...                  │
+└────────┴─────────────┴─────────────┴─────────────────────────────────────────┘
+
