@@ -6,7 +6,7 @@ This script fetches recently added formulas from Homebrew and displays
 their descriptions and homepages in a clean markdown format.
 
 Usage:
-    python brew_parser.py [--days N] [--limit N]
+    python brew_parser.py [--limit N] [--format {md,table,json}] [--debug]
 """
 
 import json
@@ -183,6 +183,85 @@ class BrewParser:
 
         return "\n".join(markdown_lines)
 
+    def format_diff_as_markdown(
+        self, diff: Dict[str, List[Dict[str, Any]]], limit: Optional[int] = None
+    ) -> str:
+        """
+        Format a diff (added/removed/updated) as Markdown.
+
+        Args:
+            diff: Result from compare_formulas()
+            limit: Optional cap on items per section
+
+        Returns:
+            Markdown string
+        """
+        added = diff.get("added", [])
+        removed = diff.get("removed", [])
+        updated = diff.get("updated", [])
+
+        if limit and limit > 0:
+            added = added[:limit]
+            removed = removed[:limit]
+            updated = updated[:limit]
+
+        lines: List[str] = []
+        total = {
+            "added": len(diff.get("added", [])),
+            "removed": len(diff.get("removed", [])),
+            "updated": len(diff.get("updated", [])),
+        }
+        lines.append("# Homebrew Formula Changes\n")
+        summary_line = "Summary: {} added, {} removed, {} updated\n".format(
+            total["added"], total["removed"], total["updated"]
+        )
+        lines.append(summary_line)
+
+        if added:
+            lines.append("## Added")
+            for f in added:
+                name = f.get("name", "Unknown")
+                version = f.get("versions", {}).get("stable", "Unknown")
+                desc = f.get("desc", "No description available")
+                homepage = f.get("homepage", "")
+                lines.extend(
+                    [
+                        f"### {name}",
+                        f"- Version: `{version}`",
+                        f"- Description: {desc}",
+                        *([f"- Homepage: {homepage}"] if homepage else []),
+                        "",
+                    ]
+                )
+
+        if removed:
+            lines.append("## Removed")
+            for f in removed:
+                name = f.get("name", "Unknown")
+                version = f.get("versions", {}).get("stable", "Unknown")
+                lines.extend([f"- {name} (last known: `{version}`)"])
+            lines.append("")
+
+        if updated:
+            lines.append("## Updated")
+            for f in updated:
+                name = f.get("name", "Unknown")
+                old_v = f.get("old_version", "?")
+                new_v = f.get("new_version", "?")
+                desc = f.get("desc", "")
+                lines.extend(
+                    [
+                        f"- {name}: `{old_v}` → `{new_v}`"
+                        + (f" — {desc}" if desc else "")
+                    ]
+                )
+            lines.append("")
+
+        if not (added or removed or updated):
+            lines.append("No changes since last snapshot.")
+
+        return "\n".join(lines)
+
     def calculate_file_hash(self, file_path: Path) -> str:
         """
         Calculate SHA256 hash of a file for change detection.
@@ -245,26 +324,11 @@ class BrewParser:
             if self.stored_formulas_path.exists():
                 old_hash = self.calculate_file_hash(self.stored_formulas_path)
 
-            # Write new data with pretty printing for readability
-            # indent=2 makes the JSON human-readable if user wants to inspect it
-            # Store in a wrapper dictionary to maintain consistent format
-            stored_data = {"formulas": formulas}
-            with open(self.stored_formulas_path, "w") as f:
-                json.dump(stored_data, f, indent=2)
+            # Write snapshot and metadata
+            self._write_snapshot(formulas)
 
             # Calculate hash of new data for future comparisons
             new_hash = self.calculate_file_hash(self.stored_formulas_path)
-
-            # Store metadata about this update
-            # This helps track when data was last updated and provides
-            # quick stats without parsing the large formula file
-            metadata = {
-                "last_updated": datetime.now().isoformat(),
-                "formula_count": len(formulas),
-                "hash": new_hash,
-            }
-            with open(self.metadata_path, "w") as f:
-                json.dump(metadata, f, indent=2)
 
             # Determine if data actually changed
             if old_hash and old_hash == new_hash:
@@ -285,6 +349,20 @@ class BrewParser:
         except json.JSONDecodeError as e:
             logger.error(f"Invalid JSON data during update: {e}")
             return False, f"Invalid JSON data: {str(e)}"
+
+    def _write_snapshot(self, formulas: List[Dict[str, Any]]) -> None:
+        """Persist formulas and metadata to disk."""
+        stored_data = {"formulas": formulas}
+        with open(self.stored_formulas_path, "w") as f:
+            json.dump(stored_data, f, indent=2)
+
+        metadata = {
+            "last_updated": datetime.now().isoformat(),
+            "formula_count": len(formulas),
+            "hash": self.calculate_file_hash(self.stored_formulas_path),
+        }
+        with open(self.metadata_path, "w") as f:
+            json.dump(metadata, f, indent=2)
 
     def load_stored_formulas(self) -> Optional[List[Dict[str, Any]]]:
         """
@@ -703,13 +781,13 @@ Examples:
     subparsers = parser.add_subparsers(dest="command", help="Commands")
 
     # Default command arguments (when no subcommand is used)
+    parser.add_argument("--limit", type=int, help="Limit items per category in output")
     parser.add_argument(
-        "--days",
-        type=int,
-        default=7,
-        help="Number of days to look back (not yet implemented)",
+        "--format",
+        choices=["md", "table", "json"],
+        default="md",
+        help="Output format for changes (default: md)",
     )
-    parser.add_argument("--limit", type=int, help="Limit number of formulas to display")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
 
     # Update subcommand - downloads and stores current formula data
@@ -748,30 +826,52 @@ Examples:
     elif args.command == "new":
         handle_new_command(args)
     else:
-        # Default behavior - show all formulas (original functionality)
-        # Set debug logging if requested
+        # Default behavior - show changes since last run and update snapshot
         if args.debug:
             logging.getLogger().setLevel(logging.DEBUG)
 
-        # Initialize the parser and run original logic
         brew_parser = BrewParser()
         console = Console()
 
         try:
-            # Fetch all formulas
-            with console.status("[bold green]Fetching formulas from Homebrew..."):
-                all_formulas = brew_parser.fetch_all_formulas()
+            # Load previous snapshot (if any)
+            stored_formulas = brew_parser.load_stored_formulas() or []
 
-            # Filter by date (placeholder for now)
-            filtered_formulas = brew_parser.filter_new_formulas(all_formulas, args.days)
+            # Fetch current formulas
+            with console.status("[bold green]Fetching current formulas..."):
+                current_formulas = brew_parser.fetch_all_formulas()
 
-            # Apply limit if specified
-            if args.limit and args.limit > 0:
-                filtered_formulas = filtered_formulas[: args.limit]
+            # Compare
+            diff = brew_parser.compare_formulas(stored_formulas, current_formulas)
 
-            # Format and display
-            markdown_output = brew_parser.format_as_markdown(filtered_formulas)
-            console.print(Markdown(markdown_output))
+            # Output in chosen format
+            if args.format == "table":
+                brew_parser.format_diff_as_table(diff)
+            elif args.format == "json":
+                summary = {
+                    "added": len(diff["added"]),
+                    "removed": len(diff["removed"]),
+                    "updated": len(diff["updated"]),
+                }
+                payload = {
+                    "summary": summary,
+                    "added": (
+                        diff["added"][: args.limit] if args.limit else diff["added"]
+                    ),
+                    "removed": (
+                        diff["removed"][: args.limit] if args.limit else diff["removed"]
+                    ),
+                    "updated": (
+                        diff["updated"][: args.limit] if args.limit else diff["updated"]
+                    ),
+                }
+                console.print(json.dumps(payload, indent=2))
+            else:
+                md = brew_parser.format_diff_as_markdown(diff, args.limit)
+                console.print(Markdown(md))
+
+            # Persist new snapshot for next run
+            brew_parser._write_snapshot(current_formulas)
 
         except requests.RequestException as e:
             console.print(

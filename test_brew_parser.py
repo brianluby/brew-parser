@@ -158,20 +158,7 @@ class TestBrewParser:
             # Should return None on error
             assert details is None
 
-    def test_filter_new_formulas(self, parser):
-        """Test filtering formulas by date (placeholder test)."""
-        # Create test data
-        formulas = [
-            {"name": "tool1", "desc": "Tool 1"},
-            {"name": "tool2", "desc": "Tool 2"},
-            {"name": "tool3", "desc": "Tool 3"},
-        ]
-
-        # Test filtering (currently returns all formulas)
-        filtered = parser.filter_new_formulas(formulas, days=7)
-
-        # For now, should return all formulas
-        assert len(filtered) == len(formulas)
+    # Removed: filter_new_formulas tests (feature dropped)
 
     def test_format_as_markdown_with_formulas(self, parser, sample_formula_data):
         """Test markdown formatting of formula data."""
@@ -679,51 +666,63 @@ class TestMainFunction:
 
     @patch("brew_parser.BrewParser")
     @patch("sys.argv", ["brew_parser.py"])
-    def test_main_with_default_args(self, mock_parser_class):
-        """Test running main() with default arguments."""
-        # Set up mock
+    def test_main_with_default_changes_flow(self, mock_parser_class):
+        """Default run shows changes since last run and updates snapshot."""
         mock_parser = Mock()
         mock_parser_class.return_value = mock_parser
-        mock_parser.fetch_all_formulas.return_value = []
-        mock_parser.filter_new_formulas.return_value = []
-        mock_parser.format_as_markdown.return_value = "# No formulas"
 
-        # Import and run main
+        # Simulate previous snapshot and current formulas
+        mock_parser.load_stored_formulas.return_value = []
+        mock_parser.fetch_all_formulas.return_value = []
+        mock_parser.compare_formulas.return_value = {
+            "added": [],
+            "removed": [],
+            "updated": [],
+        }
+        mock_parser.format_diff_as_markdown.return_value = (
+            "# Homebrew Formula Changes\nNo changes since last snapshot."
+        )
+
         from brew_parser import main
 
-        # Run main (should exit normally)
         try:
             main()
         except SystemExit as e:
-            # Should exit with 0 on success
             assert e.code == 0
+
+        mock_parser.load_stored_formulas.assert_called_once()
+        mock_parser.fetch_all_formulas.assert_called_once()
+        mock_parser.compare_formulas.assert_called_once()
+        mock_parser._write_snapshot.assert_called_once()
 
     @patch("brew_parser.BrewParser")
-    @patch("sys.argv", ["brew_parser.py", "--days", "30", "--limit", "5"])
-    def test_main_with_custom_args(self, mock_parser_class):
-        """Test running main() with custom arguments."""
-        # Set up mock with sample data
+    @patch("sys.argv", ["brew_parser.py", "--limit", "5", "--format", "json"])
+    def test_main_with_limit_and_format(self, mock_parser_class):
+        """Custom args: limit and json format work in default flow."""
         mock_parser = Mock()
         mock_parser_class.return_value = mock_parser
 
-        # Create sample formulas
-        sample_formulas = [{"name": f"tool{i}"} for i in range(10)]
-        mock_parser.fetch_all_formulas.return_value = sample_formulas
-        mock_parser.filter_new_formulas.return_value = sample_formulas
-        mock_parser.format_as_markdown.return_value = "# Formulas"
+        # Create sample diff
+        sample_diff = {
+            "added": [
+                {"name": f"tool{i}", "versions": {"stable": "1.0"}} for i in range(10)
+            ],
+            "removed": [],
+            "updated": [],
+        }
+        mock_parser.load_stored_formulas.return_value = []
+        mock_parser.fetch_all_formulas.return_value = []
+        mock_parser.compare_formulas.return_value = sample_diff
 
-        # Import and run main
         from brew_parser import main
 
-        # Run main
         try:
             main()
         except SystemExit as e:
-            # Should exit with 0 on success
             assert e.code == 0
 
-        # Verify filter was called with correct days
-        mock_parser.filter_new_formulas.assert_called_once_with(sample_formulas, 30)
+        # Ensure snapshot was written after run
+        mock_parser._write_snapshot.assert_called_once()
 
     @patch("brew_parser.BrewParser")
     @patch("sys.argv", ["brew_parser.py"])

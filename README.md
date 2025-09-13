@@ -46,11 +46,8 @@ pip install -r requirements.txt
 # Activate the virtual environment
 source venv/bin/activate
 
-# Update local formula database (required for tracking changes)
-python brew_parser.py update
-
-# See what's new since your last update
-python brew_parser.py new
+# Initialize baseline (first run) and show changes (none yet)
+python brew_parser.py
 ```
 
 ### Daily Workflow
@@ -59,17 +56,14 @@ python brew_parser.py new
 # Activate the virtual environment if not already active
 source venv/bin/activate
 
-# Update your local formula database with latest from Homebrew
-python brew_parser.py update
+# Show changes since your last run (default)
+python brew_parser.py
 
-# Show only newly added formulas
-python brew_parser.py new
+# Show changes as a table instead of Markdown
+python brew_parser.py --format table
 
-# Show all changes (added, removed, updated)
-python brew_parser.py diff
-
-# Browse all formulas (original functionality)
-python brew_parser.py --limit 10
+# Show changes as JSON (for scripting)
+python brew_parser.py --format json --limit 20
 
 # Deactivate virtual environment when done
 deactivate
@@ -79,12 +73,13 @@ deactivate
 
 | Command | Description |
 |---------|-------------|
-| `brew_parser.py` | Show all formulas (alphabetically) |
-| `brew_parser.py --limit N` | Show only first N formulas |
-| `brew_parser.py update` | Download and store current formula data |
-| `brew_parser.py diff` | Show all changes since last update |
-| `brew_parser.py new` | Show only newly added formulas |
-| `brew_parser.py new --limit N` | Show only N newest formulas |
+| `brew_parser.py` | Show changes since last run (Markdown output) |
+| `brew_parser.py --format table` | Show changes in a rich table |
+| `brew_parser.py --format json` | Show changes as JSON |
+| `brew_parser.py --limit N` | Limit items per category in the output |
+| `brew_parser.py update` | Manually update local snapshot only |
+| `brew_parser.py diff` | Show changes since last snapshot (does not save) |
+| `brew_parser.py new` | Show only newly added formulas (legacy helper) |
 
 **Note:** The `--days` parameter is currently a placeholder. Date filtering will be implemented in a future version.
 
