@@ -1,0 +1,19 @@
+I ran brew update after the brew-parser update found no changes but brew update found changes. Details below.
+
+░▒▓    ~/personal-repos/brew-parser  on   main ▓▒░························································································░▒▓ brew-parser   at 09:43:52 AM  ▓▒░─╮
+❯ brew update                                                                                                                                                                           ─╯
+==> Updating Homebrew...
+Updated 3 taps (sst/tap, homebrew/core and homebrew/cask).
+==> New Formulae
+libselinux: SELinux library and simple utilities
+libsepol: SELinux binary policy manipulation library
+==> New Casks
+livebook@nightly: Code notebooks for Elixir developers
+==> Outdated Formulae
+backlog-md     docker         freetype       harfbuzz       helm           opencode       openexr        openjph        p11-kit        qwen-code      rustic         scipy
+==> Outdated Casks
+claude-code
+
+You have 12 outdated formulae and 1 outdated cask installed.
+You can upgrade them with brew upgrade
+or list them with brew outdated.
