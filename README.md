@@ -161,11 +161,12 @@ chmod +x brew_parser.py
 - [ ] Export changes to various formats (JSON, CSV)
 - [ ] Web interface for browsing changes
 
-## Recent Improvements (v0.2.1)
+## Recent Improvements (v0.3.0)
 
-- **Contributor Guide**: Added AGENTS.md with project structure, dev commands, style, testing, and PR tips
-- **Test Robustness**: Aligned tests with the stored JSON wrapper format (`{"formulas": [...]}`)
-- **Tooling**: Verified black, flake8, mypy (strict), and pytest all pass locally
+- **Default Flow**: Running `brew_parser.py` now shows changes since your last run and updates the snapshot on success
+- **Formats**: `--format md|table|json` (default `md`) with `--limit N` per category
+- **Faster Scan**: Summary prints before details in table output
+- **pipx-ready**: Install a global CLI with `pipx install .` and run `brew-parser`
 
 ## License
 

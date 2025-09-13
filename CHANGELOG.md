@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-09-13
+
+### Added
+- Default flow runs "changes since last run" and prints Markdown; initializes baseline on first run
+- Output formats via `--format md|table|json` (default `md`) and `--limit N` per-category
+- Table UX prints a summary before details for faster scanning
+- Console script entry `brew-parser` for `pipx install .` and global CLI usage
+- Docs updated: README (new default flow, formats, pipx), AGENTS.md
+
+### Changed
+- Saves new snapshot only on successful fetch/diff/output
+
+### Removed
+- `--days` option (API lacks creation dates; will revisit with local history)
+
+### Compatibility
+- Legacy commands remain: `update` (manual snapshot), `diff` (show changes only), `new` (added only)
+
+### Validation
+- black, flake8, mypy (strict) pass; pytest: all tests green
+
 ## [0.2.1] - 2025-09-13
 
 ### Added
