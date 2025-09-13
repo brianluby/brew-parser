@@ -156,14 +156,16 @@ chmod +x brew_parser.py
 - [ ] Export changes to various formats (JSON, CSV)
 - [ ] Web interface for browsing changes
 
-## Recent Improvements (v0.2.0)
+## Recent Improvements (v0.2.1)
 
-- **Type Safety**: Added comprehensive type annotations for all methods
-- **Better Error Handling**: More specific exception catching for network, file I/O, and JSON parsing errors
-- **Code Quality**: Fully compliant with black, flake8, and mypy strict mode
-- **Cleaner Dependencies**: Removed unused dependencies
-- **Data Format Consistency**: Unified storage format for reliable data loading
+- **Contributor Guide**: Added AGENTS.md with project structure, dev commands, style, testing, and PR tips
+- **Test Robustness**: Aligned tests with the stored JSON wrapper format (`{"formulas": [...]}`)
+- **Tooling**: Verified black, flake8, mypy (strict), and pytest all pass locally
 
 ## License
 
 MIT
+
+## Contributing
+
+See `AGENTS.md` for a concise contributor guide covering project layout, dev commands, coding style, testing, and PR expectations.
